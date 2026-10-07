@@ -1,0 +1,50 @@
+# Full local stack:
+#   app        – React UI + Go backend on http://localhost:8080
+#   mediamtx   – RTSP server on rtsp://localhost:8554 (also reachable from VLC)
+#   camera-*   – FFmpeg "cameras" publishing live test patterns into MediaMTX
+#
+#   docker compose up --build
+#
+# Then add e.g. rtsp://mediamtx:8554/cam1 in the UI (the backend resolves the
+# compose service name). From your host, the same stream is
+# rtsp://localhost:8554/cam1.
+services:
+  app:
+    build: .
+    ports: ["8080:8080"]
+    environment:
+      DEMO_MODE: "false"
+      DEMO_STREAMS: "Camera 1 (720p)|rtsp://mediamtx:8554/cam1,Camera 2 (480p)|rtsp://mediamtx:8554/cam2,Camera 3 (HEVC → transcoded)|rtsp://mediamtx:8554/cam3-hevc"
+      LOG_LEVEL: info
+    depends_on: [mediamtx]
+
+  mediamtx:
+    image: bluenviron/mediamtx:1.15.1
+    ports: ["8554:8554"]
+
+  camera-1:
+    image: linuxserver/ffmpeg:latest
+    depends_on: [mediamtx]
+    restart: unless-stopped
+    command: >
+      -re -f lavfi -i testsrc2=size=1280x720:rate=25
+      -c:v libx264 -preset veryfast -tune zerolatency -g 50 -pix_fmt yuv420p -b:v 2M
+      -f rtsp -rtsp_transport tcp rtsp://mediamtx:8554/cam1
+
+  camera-2:
+    image: linuxserver/ffmpeg:latest
+    depends_on: [mediamtx]
+    restart: unless-stopped
+    command: >
+      -re -f lavfi -i smptehdbars=size=854x480:rate=25
+      -c:v libx264 -preset veryfast -tune zerolatency -g 50 -pix_fmt yuv420p -b:v 1M
+      -f rtsp -rtsp_transport tcp rtsp://mediamtx:8554/cam2
+
+  camera-3-hevc:
+    image: linuxserver/ffmpeg:latest
+    depends_on: [mediamtx]
+    restart: unless-stopped
+    command: >
+      -re -f lavfi -i mandelbrot=size=640x360:rate=25
+      -c:v libx265 -preset ultrafast -g 50 -pix_fmt yuv420p -b:v 600k
+      -f rtsp -rtsp_transport tcp rtsp://mediamtx:8554/cam3-hevc

@@ -1,0 +1,11 @@
+# Minimal MediaMTX config for local testing (RTSP only).
+logLevel: info
+rtsp: yes
+rtspAddress: :8554
+rtspTransports: [tcp, udp]
+rtmp: no
+hls: no
+webrtc: no
+srt: no
+paths:
+  all_others:

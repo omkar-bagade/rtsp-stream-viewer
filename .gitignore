@@ -31,3 +31,31 @@ go.work.sum
 # Editor/IDE
 # .idea/
 # .vscode/
+
+# RTSP Stream Viewer
+node_modules/
+dist/
+*.local
+.env.*
+!.env.example
+/backend/server
+/backend/bin/
+.DS_Store
+*.log
+.vercel
+test-streams/.bin/
+
+# Frontend build/tooling caches
+.vite/
+*.tsbuildinfo
+coverage/
+
+# Editors / OS
+.idea/
+.vscode/
+*.swp
+Thumbs.db
+
+# Local runtime files
+*.pid
+tmp/

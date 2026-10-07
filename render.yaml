@@ -1,0 +1,21 @@
+# Render Blueprint – deploys the all-in-one image (UI + API + demo streams).
+# New → Blueprint → select this repo. WebSockets are supported on Render.
+services:
+  - type: web
+    name: rtsp-stream-viewer
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /healthz
+    autoDeploy: true
+    envVars:
+      - key: DEMO_MODE
+        value: "true"
+      - key: MAX_STREAMS
+        value: "12"
+      - key: ALLOWED_ORIGINS
+        value: "*"
+      # Uncomment to restrict which RTSP hosts the public server may pull:
+      # - key: ALLOWED_RTSP_HOSTS
+      #   value: "127.0.0.1,*.example.com"
